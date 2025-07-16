@@ -5,7 +5,7 @@ from transformers import (
     AutoTokenizer,
 )
 
-from hook import AbstractResult, ObservationHook
+from hook import AbstractResult, Hook
 from utils.typing import BATCH, HIDDEN_DIM, SEQUENCE, Tensor
 
 
@@ -43,22 +43,20 @@ def main(
     )
 
     # Register the hook on the specified layer
-    hook = ObservationHook(
+    hook = Hook(
         model.transformer.h[layer_index],
         result_class=BatchHiddenStateObservationResult,
         positional_args_keys=positional_args_keys,
         output_keys=output_keys,
     )
 
-    model.generate(
-        **inputs,
-        pad_token_id=tokenizer.eos_token_id,
-        max_new_tokens=1,
-        do_sample=False,
-    )
-
-    # Remove the hook to prevent memory leaks
-    hook.remove()
+    with Hook.context([hook]):
+        model.generate(
+            **inputs,
+            pad_token_id=tokenizer.eos_token_id,
+            max_new_tokens=1,
+            do_sample=False,
+        )
 
     # Get the result of the hook
     return hook.result

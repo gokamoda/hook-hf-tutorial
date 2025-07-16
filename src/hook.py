@@ -1,3 +1,4 @@
+import contextlib
 from dataclasses import dataclass, fields
 
 import torch
@@ -29,7 +30,7 @@ class AbstractResult:
         return msg
 
 
-class ObservationHook:
+class Hook:
     hook: RemovableHandle
     result = None
 
@@ -123,3 +124,13 @@ class ObservationHook:
         Calling this will remove the hook, and it will no longer be applied in subsequent forward calls.
         """
         self.hook.remove()
+
+    @classmethod
+    @contextlib.contextmanager
+    def context(cls, hooks: "list[Hook]"):
+        """Context manager to use the hook."""
+        try:
+            yield
+        finally:
+            for hook in hooks:
+                hook.remove()

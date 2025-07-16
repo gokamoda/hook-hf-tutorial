@@ -19,3 +19,4 @@ uv sync --no-dev --extra default
 ## `hook_with_result_class`
 - どの情報をHook取得するかをコントロールできるようになった
 - Tensorの場合はcpuメモリ上で保持するようにできるようになった
+- with 構文で、`remove` を書かなくても良くなった
