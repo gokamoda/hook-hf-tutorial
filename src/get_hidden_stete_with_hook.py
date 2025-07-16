@@ -9,7 +9,7 @@ def main(
     prompt: str,
     layer_index=0,
 ) -> dict:
-    """layer_index 層目の入出力を取得する
+    """Get the inputs and outputs of a specific layer.
 
     Parameters
     ----------
@@ -21,14 +21,15 @@ def main(
     Returns
     -------
     dict
-        入力のargs, およびkwargsと、出力のoutputを含む辞書
+        A dictionary containing the inputs and outputs of the specified layer.
+        The keys are 'args', 'kwargs', and 'output'.
     """
     inputs = tokenizer(
         prompt,
         return_tensors="pt",
     )
 
-    # フックを登録
+    # Register the hook on the specified layer
     hook = ObservationHook(model.transformer.h[layer_index])
 
     model.generate(
@@ -38,10 +39,10 @@ def main(
         do_sample=False,
     )
 
-    # フックを解除
+    # Remove the hook to prevent memory leaks
     hook.remove()
 
-    # フックの結果を取得
+    # Get the result of the hook
     return hook.result
 
 

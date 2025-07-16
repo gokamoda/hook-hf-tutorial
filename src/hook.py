@@ -7,28 +7,28 @@ class ObservationHook:
     result = None
 
     def __init__(self, module: nn.Module):
-        # フック関数を登録する
+        # Register a forward hook on the module
         self.hook = module.register_forward_hook(self.hook_fn, with_kwargs=True)
 
     def hook_fn(self, module, args, kwargs, output) -> None:
-        """module の forward 関数の入出力を取得する
+        """Forward hook function to capture inputs and outputs.
 
         Parameters
         ----------
         module : nn.Module
-            フックを登録したモジュール
+            Module with hook
         args : tuple
-            モジュールに渡された位置引数
+            Position arguments passed to the module
         kwargs : dict
-            モジュールに渡されたキーワード引数
+            Keyword arguments passed to the module
         output : Tensor
-            モジュールの出力
+            Output of the module
         """
         self.result = {"args": args, "kwargs": kwargs, "output": output}
 
     def remove(self):
         """
-        フックを削除する
-        これを呼び出すと、フックが削除され、以降の forward 呼び出しではフックが適用されなくなる。
+        Remove the hook.
+        Calling this will remove the hook, and it will no longer be applied in subsequent forward calls.
         """
         self.hook.remove()
