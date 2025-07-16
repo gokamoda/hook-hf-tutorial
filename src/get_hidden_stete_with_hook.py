@@ -7,6 +7,8 @@ def main(
     model: AutoModelForCausalLM,
     tokenizer: AutoTokenizer,
     prompt: str,
+    positional_args_keys: list[str],
+    output_keys: list[str],
     layer_index=0,
 ) -> dict:
     """Get the inputs and outputs of a specific layer.
@@ -30,7 +32,11 @@ def main(
     )
 
     # Register the hook on the specified layer
-    hook = ObservationHook(model.transformer.h[layer_index])
+    hook = ObservationHook(
+        model.transformer.h[layer_index],
+        positional_args_keys=positional_args_keys,
+        output_keys=output_keys,
+    )
 
     model.generate(
         **inputs,

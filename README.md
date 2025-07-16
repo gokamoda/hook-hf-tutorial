@@ -11,3 +11,8 @@ uv sync --no-dev --extra default
 ## `simple_get_hidden_state`
 - とりあえずhookは使えるようになった
 - 課題: Hookで取ってきた位置引数、出力に名前がついていないので後から使いづらい
+
+
+## `hook_with_kwargs`
+- Hookで取ってきた位置引数、出力に名前をつけられるようになった
+- 課題: Hookを使うたびにすべての情報を取得す必要はないので非効率的
