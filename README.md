@@ -9,6 +9,7 @@ uv sync --no-dev --extra default
 
 ## ブランチ
 リポジトリが育っていく過程を追うために、以下のブランチを用意しています。
+- `src/get_hidden_state_with_hook.ipynb` から各種コードを参照してください。
 
 ### `simple_get_hidden_state`
 - とりあえずhookは使えるようになった
