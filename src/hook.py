@@ -5,6 +5,10 @@ import torch
 from torch import nn
 from torch.utils.hooks import RemovableHandle
 
+from utils.logger import init_logging
+
+logger = init_logging(__name__)
+
 
 @dataclass
 class AbstractResult:
@@ -14,6 +18,10 @@ class AbstractResult:
         for key, value in kwargs.items():
             if key in field_names:
                 setattr(self, key, value)
+            # Handle ignored/unexpected keys
+            ignored_keys = set(kwargs) - field_names
+            if ignored_keys:
+                logger.warn_once(f"Ignored unexpected keys: {ignored_keys}")
 
     def __repr__(self):
         """
@@ -40,6 +48,7 @@ class Hook:
         result_class: AbstractResult,
         positional_args_keys: list[str] = None,
         output_keys: list[str] = None,
+        with_kwargs: bool = True,
         to_cpu: bool = True,
     ):
         # Register a forward hook on the module
@@ -48,6 +57,7 @@ class Hook:
         # Register keys for positional arguments and output
         self.positional_args_keys = positional_args_keys
         self.output_keys = output_keys
+        self.with_kwargs = with_kwargs
 
         self.result_class = result_class
         self.to_cpu = to_cpu
@@ -84,12 +94,15 @@ class Hook:
                 )
 
         # Add keyword arguments to the hook result
-        hook_result.update(
-            {
-                k: v.cpu().clone() if self.to_cpu and isinstance(v, torch.Tensor) else v
-                for k, v in kwargs.items()
-            }
-        )
+        if self.with_kwargs:
+            hook_result.update(
+                {
+                    k: v.cpu().clone()
+                    if self.to_cpu and isinstance(v, torch.Tensor)
+                    else v
+                    for k, v in kwargs.items()
+                }
+            )
 
         # Add output to the hook result
         if self.output_keys is not None:
@@ -99,8 +112,8 @@ class Hook:
                     f"length {len(self.output_keys)}"
                 )
                 for k, v in zip(self.output_keys, output):
-                    assert k not in kwargs, f"Key {k} already exists in kwargs."
-                    hook_result[self.output_keys[0]] = (
+                    assert k not in hook_result, f"Key {k} already exists in kwargs."
+                    hook_result[k] = (
                         v.cpu().clone()
                         if self.to_cpu and isinstance(v, torch.Tensor)
                         else v
