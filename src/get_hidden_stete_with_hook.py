@@ -7,8 +7,8 @@ def main(
     model: AutoModelForCausalLM,
     tokenizer: AutoTokenizer,
     prompt: str,
-    positional_args_keys: list[str],
-    output_keys: list[str],
+    positional_args_keys: list[str] = None,
+    output_keys: list[str] = None,
     layer_index=0,
 ) -> dict:
     """Get the inputs and outputs of a specific layer.

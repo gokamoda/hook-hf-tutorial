@@ -50,20 +50,21 @@ class ObservationHook:
         hook_result.update(kwargs)
 
         # Add output to the hook result
-        if isinstance(output, tuple):
-            assert len(output) == len(self.output_keys), (
-                f"Output tuple length {len(output)} does not match expected "
-                f"length {len(self.output_keys)}"
-            )
-            for k, v in zip(self.output_keys, output):
-                assert k not in kwargs, f"Key {k} already exists in kwargs."
-                hook_result[self.output_keys[0]] = v
-        else:
-            assert len(self.output_keys) == 1, (
-                f"Output keys length {len(self.output_keys)} does not match expected "
-                f"length 1 for single output."
-            )
-            hook_result[self.output_keys[0]] = output
+        if self.output_keys is not None:
+            if isinstance(output, tuple):
+                assert len(output) == len(self.output_keys), (
+                    f"Output tuple length {len(output)} does not match expected "
+                    f"length {len(self.output_keys)}"
+                )
+                for k, v in zip(self.output_keys, output):
+                    assert k not in kwargs, f"Key {k} already exists in kwargs."
+                    hook_result[self.output_keys[0]] = v
+            else:
+                assert len(self.output_keys) == 1, (
+                    f"Output keys length {len(self.output_keys)} does not match expected "
+                    f"length 1 for single output."
+                )
+                hook_result[self.output_keys[0]] = output
 
         self.result = hook_result
 
