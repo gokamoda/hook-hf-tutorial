@@ -1,6 +1,17 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from dataclasses import dataclass
 
-from hook import ObservationHook
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+)
+
+from hook import AbstractResult, ObservationHook
+from utils.typing import BATCH, HIDDEN_DIM, SEQUENCE, Tensor
+
+
+@dataclass(repr=False, init=False)
+class BatchHiddenStateObservationResult(AbstractResult):
+    hidden_states: Tensor[BATCH, SEQUENCE, HIDDEN_DIM]
 
 
 def main(
@@ -10,7 +21,7 @@ def main(
     positional_args_keys: list[str] = None,
     output_keys: list[str] = None,
     layer_index=0,
-) -> dict:
+) -> BatchHiddenStateObservationResult:
     """Get the inputs and outputs of a specific layer.
 
     Parameters
@@ -34,6 +45,7 @@ def main(
     # Register the hook on the specified layer
     hook = ObservationHook(
         model.transformer.h[layer_index],
+        result_class=BatchHiddenStateObservationResult,
         positional_args_keys=positional_args_keys,
         output_keys=output_keys,
     )
@@ -63,4 +75,4 @@ if __name__ == "__main__":
     model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
     model.eval()
 
-    main(model=model, tokenizer=tokenizer, prompt=prompt)
+    main(model=model, tokenizer=tokenizer, prompt=prompt, output_keys=["hidden_states"])
